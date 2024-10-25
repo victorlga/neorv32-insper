@@ -235,7 +235,7 @@ entity neorv32_top is
     mext_irq_i     : in  std_ulogic := 'L';                                 -- machine external interrupt
   
     -- HALL input signal
-    hall_signal_i  : in  std_ulogic                                 -- HALL receive data
+    hall_signal_i  : in  std_ulogic;                                 -- HALL receive data
   );
 end neorv32_top;
 

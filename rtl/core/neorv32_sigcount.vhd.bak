@@ -2,9 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library neorv32;
-use neorv32.neorv32_package.all;
-
 entity neorv32_sigcount is
     generic (
         DEBOUNCE_LIMIT : natural := 500000  -- debounce limit (default value)
@@ -65,14 +62,14 @@ begin
     bus_access: process(clk_i, rstn_i) 
     begin
         if (rstn_i = '0') then
-				bus_rsp_o <= rsp_terminate_c;  -- Reset bus response
+            bus_rsp_o <= (others => '0');  -- Reset bus response
         elsif rising_edge(clk_i) then
             -- Bus handshake
             bus_rsp_o.ack <= bus_req_i.stb;
             bus_rsp_o.err <= '0';
             if (bus_req_i.stb = '1') then
                 if (bus_req_i.rw = '0') then  -- Read access only
-                    bus_rsp_o.data <= std_ulogic_vector(counter);  -- Read counter value
+                    bus_rsp_o.data <= std_logic_vector(counter);  -- Read counter value
                 end if;  -- No write access, so do nothing for rw = '1'
             end if;
         end if;

@@ -7,15 +7,15 @@ use neorv32.neorv32_package.all;
 
 entity neorv32_sigcount is
     generic (
-        DEBOUNCE_LIMIT : natural := 500000  -- debounce limit (default value)
+        DEBOUNCE_LIMIT : natural := 1  -- debounce limit (default value)
     );
     port (
         clk_i        : in  std_ulogic;                        -- clock input
         rstn_i       : in  std_ulogic;                        -- reset input (active low)
         button_i     : in  std_ulogic;                        -- button input
         bus_req_i    : in  bus_req_t;                         -- bus request
-        bus_rsp_o    : out bus_rsp_t                         -- bus response
-        -- counter_o    : out std_ulogic_vector(31 downto 0)    -- counter output FOR DEBUG
+        bus_rsp_o    : out bus_rsp_t;                         -- bus response
+        counter_o    : out std_logic_vector(31 downto 0)    -- counter output FOR DEBUG
     );
 end entity neorv32_sigcount;
 
@@ -29,9 +29,9 @@ architecture rtl of neorv32_sigcount is
 begin
 
     -- Debounce process
-    debounce: process(clk_i, rstn_i) 
+    process(clk_i, rstn_i) 
     begin
-        if (rstn_i = '0') then
+        if (rstn_i = '1') then
             debounced_button <= '0';
             debounce_counter <= 0;
             button_prev <= '0';
@@ -47,24 +47,24 @@ begin
             end if;
             button_prev <= button_i;  -- Store the previous state
         end if;
-    end process debounce;
+    end process;
 
     -- Edge detection and counter
-    edge_detect: process(clk_i, rstn_i) 
+    process(clk_i, rstn_i) 
     begin
-        if (rstn_i = '0') then
+        if (rstn_i = '1') then
             counter <= (others => '0');  -- Reset counter
         elsif rising_edge(clk_i) then
-            if (debounced_button = '1' and button_prev = '0') then
-                counter <= counter + 1;  -- Increment on rising edge
+            if (debounced_button = '0' and button_prev = '1') then
+                counter <= counter + 1;  -- Increment on falling edge
             end if;
         end if;
-    end process edge_detect;
+    end process;
 
     -- Bus access process
-    bus_access: process(clk_i, rstn_i) 
+    process(clk_i, rstn_i) 
     begin
-        if (rstn_i = '0') then
+        if (rstn_i = '1') then
 				bus_rsp_o <= rsp_terminate_c;  -- Reset bus response
         elsif rising_edge(clk_i) then
             -- Bus handshake
@@ -76,9 +76,9 @@ begin
                 end if;  -- No write access, so do nothing for rw = '1'
             end if;
         end if;
-    end process bus_access;
+    end process;
 
     -- Output counter FOR DEBUG
-    -- counter_o <= std_logic_vector(counter);
+    counter_o <= std_logic_vector(counter);
 
 end architecture rtl;

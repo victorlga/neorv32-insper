@@ -131,7 +131,7 @@ entity neorv32_top is
     IO_SLINK_TX_FIFO           : natural range 1 to 2**15       := 1;           -- TX fifo depth, has to be a power of two, min 1
     IO_CRC_EN                  : boolean                        := false;        -- implement cyclic redundancy check unit (CRC)?
   
-    SIGCOUNT_DEBOUNCE_LIMIT    : natural                        := 500000
+    SIGCOUNT_DEBOUNCE_LIMIT    : natural                        := 1
   );
   port (
     -- Global control --
@@ -235,7 +235,8 @@ entity neorv32_top is
     mext_irq_i     : in  std_ulogic := 'L';                                 -- machine external interrupt
   
     -- HALL input signal
-    hall_signal_i  : in  std_ulogic                                 -- HALL receive data
+    hall_signal_i  : in  std_ulogic;                                 -- HALL receive data
+	 counter_output_signal    : out std_logic_vector(31 downto 0)
   );
 end neorv32_top;
 
@@ -1157,8 +1158,8 @@ begin
             rstn_i       => rstn_sys,
             button_i     => hall_signal_i,          -- Sinal de entrada do botão
             bus_req_i    => iodev_req(IODEV_SIGCOUNT),    -- Conectar a requisição do barramento
-            bus_rsp_o    => iodev_rsp(IODEV_SIGCOUNT)    -- Conectar a resposta do barramento
-            -- counter_o    => counter_output_signal          -- Sinal de saída do contador FOR DEBUG
+            bus_rsp_o    => iodev_rsp(IODEV_SIGCOUNT),    -- Conectar a resposta do barramento
+            counter_o    => counter_output_signal          -- Sinal de saída do contador FOR DEBUG
         );
 
 
